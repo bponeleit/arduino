@@ -4,7 +4,9 @@
 #include "DHT.h"
 #include <JeeLib.h>
 
-ISR(WDT_vect) { Sleepy::watchdogEvent(); }
+ISR(WDT_vect) { 
+  Sleepy::watchdogEvent(); 
+}
 
 #define DHTPIN 2     // what pin we're connected to
 
@@ -20,16 +22,16 @@ ISR(WDT_vect) { Sleepy::watchdogEvent(); }
 
 DHT dht(DHTPIN, DHTTYPE);
 
-  int photocellPin = 0;     // the cell and 10K pulldown are connected to a0
-  int photocellReading;     // the analog reading from the sensor divider
-  
-  float h;
-  float t;
+int photocellPin = 0;     // the cell and 10K pulldown are connected to a0
+int photocellReading;     // the analog reading from the sensor divider
+
+float h;
+float t;
 
 void setup() {
   Serial.begin(9600); 
   //Serial.println("DHTxx test!");
- 
+
   dht.begin();
 }
 
@@ -40,7 +42,7 @@ void loop() {
   Serial.print(h);
   Serial.print(photocellReading);
 
-//Every 3 Seconds  
+  //Every 3 Seconds  
   Sleepy::loseSomeTime(3000);
 }
 
@@ -54,3 +56,4 @@ void readDHT() {
 void readPhotocell() {
   photocellReading = analogRead(photocellPin);  
 }
+
