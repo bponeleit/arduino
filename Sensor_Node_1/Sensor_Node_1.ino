@@ -15,6 +15,8 @@ ISR(WDT_vect) {
 #define DHTTYPE DHT22   // DHT 22  (AM2302)
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 
+#define NODE_ID 1
+
 // Connect pin 1 (on the left) of the sensor to +5V
 // Connect pin 2 of the sensor to whatever your DHTPIN is
 // Connect pin 4 (on the right) of the sensor to GROUND
@@ -36,14 +38,19 @@ void setup() {
 }
 
 void loop() {
+  //Every 3 Seconds  
+  Sleepy::loseSomeTime(3000);  
+  
   readDHT();
   readPhotocell();
-  Serial.print(t);
-  Serial.print(h);
-  Serial.print(photocellReading);
-
-  //Every 3 Seconds  
-  Sleepy::loseSomeTime(3000);
+  
+  Serial.print(NODE_ID);
+  Serial.print(" ");
+  Serial.print(t, DEC);
+  Serial.print(" ");
+  Serial.print(h, DEC);
+  Serial.print(" ");
+  Serial.println(photocellReading);
 }
 
 void readDHT() {
