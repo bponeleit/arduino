@@ -43,7 +43,7 @@ float h;
 float t;
 
 void flashLed(int pin, int times, int wait) {
-  Serial.println("flash led");
+  //Serial.println("flash led");
   for (int i = 0; i < times; i++) {
     digitalWrite(pin, HIGH);
     delay(wait);
@@ -57,7 +57,6 @@ void flashLed(int pin, int times, int wait) {
 
 void setup() {
   Serial.begin(9600); 
-  //Serial.println("DHTxx test!");
 
   dht.begin();
   xbee.setSerial(Serial);
@@ -82,37 +81,19 @@ void loop() {
   char photobuf[7];
   itoa(photocellReading, photobuf, 10);
 
-  char space[2] = { 
-    0x20, 0x00   };
-
   char strbuf[28];
   strcpy(strbuf, nodebuf);
-  strcat(strbuf, space);
   strcat(strbuf, tbuf);
-  strcat(strbuf, space);
   strcat(strbuf, hbuf);
-  strcat(strbuf, space),
   strcat(strbuf, photobuf);
 
-  uint8_t data[28];
-  memcpy(data, strbuf, 28);
-  
-  //Serial.print(strbuf);
+  uint8_t data[strlen(strbuf)];
+  memcpy(data, strbuf, strlen(strbuf));
   
 
   zbTx.setPayload(data);
   zbTx.setPayloadLength(sizeof(data));
-  //Serial.println("Before send");
   xbee.send(zbTx);
-  //Serial.print("After send");
-
-  //Serial.print(NODE_ID); //2 bytes
-  //Serial.print(" "); // 1 byte
-  //Serial.print(t, DEC); 
-  //Serial.print(" ");
-  //Serial.print(h, DEC);
-  //Serial.print(" ");
-  //Serial.println(photocellReading);
   
   flashLed(statusLed, 1, 100);
 
@@ -150,8 +131,7 @@ void loop() {
     flashLed(errorLed, 2, 200);
   }
   
-  //delay(1000);
-    //Every 3 Seconds  
+    //Every 30 Seconds  
   Sleepy::loseSomeTime(30000);
 
 }
