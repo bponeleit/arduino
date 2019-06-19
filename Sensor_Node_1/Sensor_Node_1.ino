@@ -1,18 +1,18 @@
 // Example testing sketch for various DHT humidity/temperature sensors
 // Written by ladyada, public domain
 
-#include "DHT.h"
+#include <DHT.h>
 #include <JeeLib.h>
 #include <XBee.h>
 
-ISR(WDT_vect) { 
-  Sleepy::watchdogEvent(); 
+ISR(WDT_vect) {
+  Sleepy::watchdogEvent();
 }
 
 #define DHTPIN 2     // what pin we're connected to
 
 // Uncomment whatever type you're using!
-//#define DHTTYPE DHT11   // DHT 11 
+//#define DHTTYPE DHT11   // DHT 11
 #define DHTTYPE DHT22   // DHT 22  (AM2302)
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 
@@ -26,8 +26,9 @@ ISR(WDT_vect) {
 DHT dht(DHTPIN, DHTTYPE);
 XBee xbee = XBee();
 
-uint8_t payload[] = { 
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, }; 
+uint8_t payload[] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
 
 XBeeAddress64 addr64 = XBeeAddress64(0x0013a200, 0x40acb044);
 ZBTxRequest zbTx = ZBTxRequest();//addr64, payload, sizeof(payload));
@@ -41,6 +42,8 @@ int errorLed = 13;
 
 float h;
 float t;
+
+int r = 0;
 
 void flashLed(int pin, int times, int wait) {
   //Serial.println("flash led");
@@ -56,7 +59,7 @@ void flashLed(int pin, int times, int wait) {
 }
 
 void setup() {
-  Serial.begin(9600); 
+  Serial.begin(9600);
 
   dht.begin();
   xbee.setSerial(Serial);
@@ -64,9 +67,11 @@ void setup() {
   zbTx.setAddress64(addr64);
 }
 
-void loop() {  
+void loop() {
 
-  readDHT();
+  if (r++ % 4 == 0) {
+    readDHT();
+  }
   readPhotocell();
 
   char nodebuf[7];
@@ -89,12 +94,12 @@ void loop() {
 
   uint8_t data[strlen(strbuf)];
   memcpy(data, strbuf, strlen(strbuf));
-  
+
 
   zbTx.setPayload(data);
   zbTx.setPayloadLength(sizeof(data));
   xbee.send(zbTx);
-  
+
   flashLed(statusLed, 1, 100);
 
   // after sending a tx request, we expect a status response
@@ -102,7 +107,7 @@ void loop() {
   if (xbee.readPacket(1000)) {
     // got a response!
 
-    // should be a znet tx status            	
+    // should be a znet tx status
     if (xbee.getResponse().getApiId() == ZB_TX_STATUS_RESPONSE) {
       xbee.getResponse().getZBTxStatusResponse(txStatus);
 
@@ -111,27 +116,27 @@ void loop() {
         // success.  time to celebrate
         flashLed(statusLed, 5, 200);
         Serial.print("success");
-      } 
+      }
       else {
         // the remote XBee did not receive our packet. is it powered on?
         Serial.print("Delivery failed");
         flashLed(errorLed, 3, 200);
       }
     }
-  } 
+  }
   else if (xbee.getResponse().isError()) {
     //Serial.print("Analog reading = ");
-    Serial.print("Error reading packet.  Error code: ");  
+    Serial.print("Error reading packet.  Error code: ");
     Serial.println(xbee.getResponse().getErrorCode());
-  } 
+  }
   else {
     // local XBee did not provide a timely TX Status Response -- should not happen
     Serial.print("XBee no response");
     Serial.print(xbee.getResponse().getApiId());
     flashLed(errorLed, 2, 200);
   }
-  
-    //Every 30 Seconds  
+
+  //Every 30 Seconds
   Sleepy::loseSomeTime(30000);
 
 }
@@ -143,8 +148,6 @@ void readDHT() {
   t = dht.readTemperature();
 }
 
-void readPhotocell() {
-  photocellReading = analogRead(photocellPin);  
+void readPhotocell() {
+  photocellReading = analogRead(photocellPin);
 }
-
-
